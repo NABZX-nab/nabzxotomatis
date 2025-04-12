@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Produk Nabzx Botz & Pemesanan VPS</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: linear-gradient(135deg, #7f00ff, #e100ff);
+      --bg: #0f0c29;
+      --text: #ffffff;
+      --accent: #00ffe7;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Poppins', sans-serif;
+    }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      padding: 20px;
+      min-height: 100vh;
+    }
+    h1, h2, h3 {
+      text-align: center;
+      margin-bottom: 20px;
+      background: var(--primary);
+      -webkit-background-clip: text;
+      color: transparent;
+      font-weight: 600;
+    }
+    .product-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      padding: 0 10px;
+      margin-bottom: 40px;
+    }
+    .product {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 20px;
+      padding: 20px;
+      text-align: center;
+      border: 2px solid #ffffff20;
+      box-shadow: 0 0 20px rgba(127, 0, 255, 0.4);
+      transition: transform 0.3s ease;
+    }
+    .product:hover {
+      transform: translateY(-5px);
+    }
+    .product p {
+      font-size: 14px;
+      margin-bottom: 15px;
+    }
+    .price {
+      font-size: 16px;
+      color: var(--accent);
+      font-weight: 600;
+      margin-bottom: 15px;
+    }
+    .buy-btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 30px;
+      cursor: pointer;
+      transition: opacity 0.3s ease;
+    }
+    .buy-btn:hover {
+      opacity: 0.9;
+    }
+    .form-section {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 20px;
+      border-radius: 20px;
+      max-width: 600px;
+      margin: auto;
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+    }
+    label, select, input {
+      display: block;
+      width: 100%;
+      margin-bottom: 15px;
+      padding: 10px;
+      border-radius: 10px;
+      border: none;
+    }
+    button {
+      width: 100%;
+      background: var(--primary);
+      color: white;
+      padding: 12px;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #ff007f;
+    }
+    #qrisContainer, #hasilVPS {
+      margin-top: 20px;
+      text-align: center;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    }
+    .qris-wrapper {
+      padding: 20px;
+      background: var(--primary);
+      border-radius: 20px;
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+      transition: transform 0.3s ease;
+    }
+    .qris-wrapper:hover {
+      transform: scale(1.05);
+    }
+    .qris-image {
+  max-width: 200px;
+  margin: 20px auto;
+  display: block;
+  transform: rotate(-0deg); /* ubah angkanya sampai lurus */
+}
+    }
+    .qris-text {
+      font-size: 18px;
+      margin-top: 10px;
+      color: #fff;
+    }
+    .qris-btn {
+      background: #00ffe7;
+      color: #000;
+      padding: 12px 24px;
+      border-radius: 30px;
+      cursor: pointer;
+      border: none;
+      margin-top: 20px;
+      font-weight: bold;
+      transition: background 0.3s ease;
+    }
+    .qris-btn:hover {
+      background: #ff007f;
+    }
+  </style>
+</head>
+<body>
+  <h1>Produk Nabzx Botz</h1>
+  <div class="product-list">
+    <div class="product">
+      <h2>Pemesanan VPS DigitalOcean</h2>
+      <div class="form-section">
+        <label>Pilih Paket VPS:</label>
+        <select id="paketVPS">
+          <option value="1">1 vCPU, 1GB RAM - Rp15.000</option>
+          <option value="2">1 vCPU, 2GB RAM - Rp20.000</option>
+          <option value="3">2 vCPU, 2GB RAM - Rp25.000</option>
+          <option value="4">2 vCPU, 4GB RAM - Rp45.000</option>
+          <option value="5">4 vCPU, 8GB RAM - Rp45.000</option>
+          <option value="6">4 vCPU, 16GB RAM - Rp55.000</option>
+        </select>
+
+        <label>Nama Domain:</label>
+        <input type="text" id="namaDomain" placeholder="contoh: client1">
+
+        <button onclick="buatQRIS()">Bayar Sekarang</button>
+
+        <div id="qrisContainer"></div>
+        <pre id="hasilVPS"></pre>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    async function buatQRIS() {
+      const paket = document.getElementById("paketVPS").value;
+      const domain = document.getElementById("namaDomain").value.toLowerCase();
+
+      if (!domain) return alert("Silakan masukkan nama domain.");
+
+      const paketData = {
+        "1": { image: "s-1vcpu-1gb", harga: 15000 },
+        "2": { image: "s-1vcpu-2gb", harga: 20000 },
+        "3": { image: "s-2vcpu-2gb", harga: 25000 },
+        "4": { image: "s-2vcpu-4gb", harga: 45000 },
+        "5": { image: "s-4vcpu-8gb", harga: 45000 },
+        "6": { image: "s-4vcpu-16gb", harga: 55000 },
+      };
+
+      const data = paketData[paket];
+      const random = Math.floor(Math.random() * (250 - 110 + 1)) + 110;
+      const amount = data.harga + random;
+
+      const qrisRes = await fetch(`https://nabzxapibot.vercel.app/api/orkut/createpayment?apikey=NabzxBotz&amount=${amount}&codeqr=00020101021126670016COM.NOBUBANK.WWW01189360050300000879140214621204751813560303UMI51440014ID.CO.QRIS.WWW0215ID20243511202980303UMI5204541153033605802ID5921NYOMANJEBEH OK20891246009SIJUNJUNG61052751162070703A0163048E2B`);
+      const qris = await qrisRes.json();
+
+      document.getElementById("qrisContainer").innerHTML = `
+        <div class="qris-wrapper">
+          <h3 class="qris-text">Scan QRIS untuk Pembayaran:</h3>
+          <img src="${qris.result.qrImageUrl}" class="qris-image"><br>
+          <p class="qris-text">Total: Rp${qris.result.amount}</p>
+          <button class="qris-btn" onclick="cekPembayaran()">Cek Pembayaran</button>
+        </div>
+      `;
+
+      const interval = setInterval(async () => {
+        const cekRes = await fetch(`https://nabzxapibot.vercel.app/api/orkut/cekstatus?apikey=NabzxBotz&merchant=OK2089124&keyorkut=00020101021126670016COM.NOBUBANK.WWW01189360050300000879140214621204751813560303UMI51440014ID.CO.QRIS.WWW0215ID20243511202980303UMI5204541153033605802ID5921NYOMANJEBEH OK20891246009SIJUNJUNG61052751162070703A0163048E2B`);
+        const status = await cekRes.json();
+
+        if (status?.amount == qris.result.amount.toString()) {
+          clearInterval(interval);
+          document.getElementById("qrisContainer").innerHTML += "<br><strong>Pembayaran diterima! Deploying VPS...</strong>";
+
+          const pass = Math.random().toString(36).slice(-8);
+          const hostname = domain;
+          const dropletPayload = {
+            name: hostname,
+            region: "sgp1",
+            size: data.image,
+            image: "ubuntu-20-04-x64",
+            ssh_keys: null,
+            backups: false,
+            ipv6: true,
+            user_data: `#cloud-config\npassword: ${pass}\nchpasswd: { expire: False }`
+          };
+
+          const dropletRes = await fetch("https://api.digitalocean.com/v2/droplets", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": "Bearer TOKEN_DIGITALOCEAN"
+            },
+            body: JSON.stringify(dropletPayload)
+          });
+
+          const dropletData = await dropletRes.json();
+          const id = dropletData.droplet.id;
+
+          await new Promise(r => setTimeout(r, 60000));
+
+          const ipRes = await fetch(`https://api.digitalocean.com/v2/droplets/${id}`, {
+            headers: {
+              "Authorization": "Bearer TOKEN_DIGITALOCEAN"
+            }
+          });
+          const ipData = await ipRes.json();
+          const ip = ipData.droplet.networks.v4[0].ip_address;
+
+          const subdomain1 = `${domain}.nabzxbotz.biz.id`;
+          const subdomain2 = `node.${domain}.nabzxbotz.biz.id`;
+
+          await fetch(`https://api.cloudflare.com/client/v4/zones/d971f3fd22d90a20f8da17879cf7b0ce/dns_records`, {
+            method: "POST",
+            headers: {
+              "Authorization": "Bearer hRd5vo1ExH0KhJ0iqdsRrn4BbT6u5rYcP5tgTPB2",
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ type: "A", name: subdomain1, content: ip, ttl: 3600, proxied: false })
+          });
+
+          await fetch(`https://api.cloudflare.com/client/v4/zones/d971f3fd22d90a20f8da17879cf7b0ce/dns_records`, {
+            method: "POST",
+            headers: {
+              "Authorization": "Bearer hRd5vo1ExH0KhJ0iqdsRrn4BbT6u5rYcP5tgTPB2",
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ type: "A", name: subdomain2, content: ip, ttl: 3600, proxied: false })
+          });
+
+          document.getElementById("hasilVPS").innerText = `
+✅ VPS Berhasil Dibuat!
+ID: ${id}
+IP: ${ip}
+Password: ${pass}
+Subdomain: ${subdomain1}, ${subdomain2}
+          `;
+        }
+      }, 10000);
+    }
+  </script></body>
+</html>
