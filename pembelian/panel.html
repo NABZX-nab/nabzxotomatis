@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Beli Panel Pterodactyl</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 p-4">
+  <div class="max-w-md mx-auto bg-white p-6 rounded-xl shadow-md">
+    <h2 class="text-2xl font-bold mb-4">Beli Panel Pterodactyl</h2>
+    
+    <label for="ram" class="block font-medium">Pilih RAM</label>
+    <select id="ram" class="w-full p-2 border rounded mb-4">
+      <option value="">-- Pilih --</option>
+      <option value="1gb">1GB</option>
+      <option value="2gb">2GB</option>
+      <option value="3gb">3GB</option>
+      <option value="4gb">4GB</option>
+      <option value="5gb">5GB</option>
+      <option value="6gb">6GB</option>
+      <option value="7gb">7GB</option>
+      <option value="8gb">8GB</option>
+      <option value="9gb">9GB</option>
+      <option value="10gb">10GB</option>
+      <option value="unlimited">Unlimited</option>
+    </select>
+
+    <button onclick="beliPanel()" class="w-full bg-blue-600 hover:bg-blue-700 text-white p-2 rounded">Beli Sekarang</button>
+
+    <div id="hasil" class="mt-6 text-sm"></div>
+  </div>
+
+  <script>
+    const panelConfig = {
+      "1gb": { ram: 1000, disk: 1000, cpu: 40, harga: 1000 },
+      "2gb": { ram: 2000, disk: 1000, cpu: 60, harga: 2000 },
+      "3gb": { ram: 3000, disk: 2000, cpu: 80, harga: 3000 },
+      "4gb": { ram: 4000, disk: 2000, cpu: 100, harga: 4000 },
+      "5gb": { ram: 5000, disk: 3000, cpu: 120, harga: 5000 },
+      "6gb": { ram: 6000, disk: 3000, cpu: 140, harga: 6000 },
+      "7gb": { ram: 7000, disk: 4000, cpu: 160, harga: 7000 },
+      "8gb": { ram: 8000, disk: 4000, cpu: 180, harga: 8000 },
+      "9gb": { ram: 9000, disk: 5000, cpu: 200, harga: 9000 },
+      "10gb": { ram: 10000, disk: 5000, cpu: 220, harga: 10000 },
+      "unlimited": { ram: 0, disk: 0, cpu: 0, harga: 11000 }
+    };
+
+    async function beliPanel() {
+      const pilihan = document.getElementById('ram').value;
+      const hasilDiv = document.getElementById('hasil');
+
+      if (!pilihan || !panelConfig[pilihan]) {
+        hasilDiv.innerHTML = '<span class="text-red-600">Silakan pilih RAM terlebih dahulu.</span>';
+        return;
+      }
+
+      const config = panelConfig[pilihan];
+      const total = config.harga + Math.floor(Math.random() * (250 - 110) + 110);
+
+      hasilDiv.innerHTML = 'Membuat QRIS pembayaran...';
+
+      try {
+        const qrisRes = await fetch(`https://nabzxapibot.vercel.app/api/orkut/createpayment?apikey=APIKEYKAMU&amount=${total}&codeqr=QR_URL_KAMU`);
+        const qrisData = await qrisRes.json();
+
+        hasilDiv.innerHTML = `
+          <p><strong>ID Transaksi:</strong> ${qrisData.result.transactionId}</p>
+          <p><strong>Total:</strong> Rp${qrisData.result.amount}</p>
+          <img src="${qrisData.result.qrImageUrl}" class="my-2 rounded-xl" />
+          <p class="text-sm text-red-600">QRIS berlaku 5 menit. Pembayaran akan dicek otomatis...</p>
+        `;
+
+        // Tambahkan pengecekan otomatis pembayaran di sini
+        cekPembayaranLoop(qrisData.result.transactionId, qrisData.result.amount, config);
+      } catch (err) {
+        hasilDiv.innerHTML = `<span class="text-red-600">Gagal membuat QRIS. Coba lagi.</span>`;
+      }
+    }
+
+    async function cekPembayaranLoop(id, amount, config) {
+      const hasilDiv = document.getElementById('hasil');
+      let attempt = 0;
+      const maxAttempt = 40; // 5 menit
+
+      const interval = setInterval(async () => {
+        attempt++;
+        const cek = await fetch(`https://nabzxapibot.vercel.app/api/orkut/cekstatus?apikey=APIKEYKAMU&merchant=MERCHANT_ID&keyorkut=API_KEY_KUOTA`);
+        const status = await cek.json();
+
+        if (status?.amount == amount.toString()) {
+          clearInterval(interval);
+          hasilDiv.innerHTML += '<p class="text-green-600 font-bold mt-2">Pembayaran diterima!</p>';
+          buatPanel(config);
+        }
+
+        if (attempt >= maxAttempt) {
+          clearInterval(interval);
+          hasilDiv.innerHTML += '<p class="text-red-600 mt-2">QRIS telah kadaluarsa.</p>';
+        }
+      }, 8000);
+    }
+
+    async function buatPanel(config) {
+      const username = Math.random().toString(36).substring(2, 8);
+      const password = username + Math.random().toString(36).substring(2, 4);
+
+      const res = await fetch(`https://domain-panelmu.com/api/application/users`, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer API_PTERODACTYL_KAMU'
+        },
+        body: JSON.stringify({
+          email: username + '@gmail.com',
+          username: username,
+          first_name: username,
+          last_name: 'Server',
+          language: 'en',
+          password: password
+        })
+      });
+
+      const data = await res.json();
+      if (data.errors) {
+        document.getElementById('hasil').innerHTML += '<p class="text-red-600">Gagal membuat akun panel.</p>';
+        return;
+      }
+
+      // lanjutkan membuat server seperti di bot .buyp
+      document.getElementById('hasil').innerHTML += `
+        <p class="mt-4 font-semibold">Panel berhasil dibuat:</p>
+        <p><strong>Username:</strong> ${username}</p>
+        <p><strong>Password:</strong> ${password}</p>
+        <p><strong>Login Panel:</strong> https://domain-panelmu.com</p>
+      `;
+    }
+  </script>
+</body>
+</html>
